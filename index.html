@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="./iconB.ico" />
+    <title>Speed typing</title>
+  </head>
+  <body>
+    <div class="textWrapper0">
+      <div>
+        <p class="textWrapper1"><span id="resultText" class="spanText"></span><span id="letterEl"></span><span id="aferEl" class="spanText"></span></p>
+      </div>
+      <br />
+    </div>
+    <div class="textWrapper">
+      <button onclick="Restart()" id="startBtn">Start</button>
+    </div>
+    <div class="textWrapper">
+      <div class="infoWrapper">
+        <p id="timerEl"></p>
+        <p id="info"></p>
+      </div>
+    </div>
+    <div class="textWrapper">
+      <p id="currentResult"></p>
+    </div>
+    <div class="textWrapper">
+      <p id="userResult" class="text"></p>
+    </div>
+    <div class="keyboardWrapper" id="keyboardWrapper">
+      <div id="keyboard" class="keyboard">
+        <div class="keyboardRow btnCloseKeyboard"><div id="btnCloseKeyboard">&#x25BC;</div></div>
+        <div class="keyboardRow">
+          <span id="btn1">1</span>
+          <span id="btn2">2</span>
+          <span id="btn3">3</span>
+          <span id="btn4">4</span>
+          <span id="btn5">5</span>
+          <span id="btn6">6</span>
+          <span id="btn7">7</span>
+          <span id="btn8">8</span>
+          <span id="btn9">9</span>
+          <span id="btn0">0</span>
+        </div>
+        <div class="keyboardRow">
+          <span id="btnq">q</span>
+          <span id="btnw">w</span>
+          <span id="btne">e</span>
+          <span id="btnr">r</span>
+          <span id="btnt">t</span>
+          <span id="btny">y</span>
+          <span id="btnu">u</span>
+          <span id="btni">i</span>
+          <span id="btno">o</span>
+          <span id="btnp">p</span>
+        </div>
+        <div class="keyboardRow">
+          <span id="btna">a</span>
+          <span id="btns">s</span>
+          <span id="btnd">d</span>
+          <span id="btnf">f</span>
+          <span id="btng">g</span>
+          <span id="btnh">h</span>
+          <span id="btnj">j</span>
+          <span id="btnk">k</span>
+          <span id="btnl">l</span>
+        </div>
+        <div class="keyboardRow">
+          <span id="btnshift">&#8679;</span>
+          <span id="btnz">z</span>
+          <span id="btnx">x</span>
+          <span id="btnc">c</span>
+          <span id="btnv">v</span>
+          <span id="btnb">b</span>
+          <span id="btnn">n</span>
+          <span id="btnm">m</span>
+          <span id="btnshift">&#8679;</span>
+        </div>
+        <div class="keyboardRow">
+          <span id="btnsymbols">!#1</span>
+          <span id="btncoma">,</span>
+          <span id="btnspace"></span>
+          <span id="btndot">.</span>
+          <span id="btnenter">&#8626;</span>
+        </div>
+      </div>
+    </div>
+    <script>
+      const textTest = `this is test text tt`;
+      const textDefault = `A freelancer or freelance worker, is a term commonly used for a person who is self-employed and is not necessarily committed to a particular employer long-term. Freelance workers are sometimes represented by a company or a temporary agency that resells freelance labor to clients; others work independently or use professional associations or websites to get work. While the term "independent contractor" would be used in a higher register of English to designate the tax and employment classes of this type of worker, the term freelancing is most common in culture and creative industries and this term specifically motions to participation therein. Fields, professions, and industries where freelancing is predominant include: music, writing, acting, computer programming, web design, graphic design, translating and illustrating, film and video production and other forms of piece work which some cultural theorists consider as central to the cognitive-cultural economy.`;
+      const userResult = document.getElementById("userResult");
+      const timerEl = document.getElementById("timerEl");
+      const info = document.getElementById("info");
+      const startBtn = document.getElementById("startBtn");
+      const btnCloseKeyboard = document.getElementById("btnCloseKeyboard");
+      const letterEl = document.getElementById("letterEl");
+      const afterEl = document.getElementById("aferEl");
+      const resultText = document.getElementById("resultText");
+      const currentResult = document.getElementById("currentResult");
+      const keyboardKeysGlobal = { key: "" };
+      const keyboardWrapper = document.getElementById("keyboardWrapper");
+      let isKeyboardOpen = false;
+      let isBtnShift = false;
+      let text = "";
+      let isStart = false;
+      let isFinish = false;
+      let timerCount = 0;
+      let countLetter = 0;
+      let prevText = "";
+      let afterText = text;
+      let mistake = 0;
+      let right = 0;
+      let wordCount = 0;
+      let timerInterval = setInterval(timer, 1000);
+
+      const keyboard = document.getElementById("keyboard");
+      const keyboardKeys = keyboard.getElementsByTagName("span");
+      for (let i = 0; i < keyboardKeys.length; i++) {
+        keyboardKeys[i].addEventListener("click", handleKeyboard);
+      }
+
+      btnCloseKeyboard.addEventListener("click", keyboardOpenToggle);
+
+      function keyboardOpenToggle() { 
+        isKeyboardOpen = isKeyboardOpen === false ? true : false;
+        console.log("toggle",isKeyboardOpen);
+        if (!isKeyboardOpen) {
+          keyboardWrapper.style.bottom = "0";
+          keyboardWrapper.style.top = "unset";
+          btnCloseKeyboard.style.transform = "rotate(0deg)";
+        } else {
+          keyboardWrapper.style.top = "97%";
+          btnCloseKeyboard.style.transform = "rotate(180deg)";
+        }
+       }
+
+      function handleKeyboard(e) {
+        keyboardKeysGlobal.key = "";
+        if (e.target.id.length === 4) {
+          if (isBtnShift) {
+            keyboardKeysGlobal.key = e.target.id.substring(3).toUpperCase();
+          } else {
+            keyboardKeysGlobal.key = e.target.id.substring(3).toLowerCase();
+          }
+        } else if (e.target.id === "btnspace") {
+          keyboardKeysGlobal.key = " ";
+        } else if (e.target.id === "btndot") {
+          keyboardKeysGlobal.key = ".";
+        } else if (e.target.id === "btncoma") {
+          keyboardKeysGlobal.key = ",";
+        } else if (e.target.id === "btnenter") {
+          keyboardKeysGlobal.key = "enter";
+        } else if (e.target.id === "btnshift") {
+          shiftToggle();
+          return;
+        }
+        eventHendlerText(keyboardKeysGlobal);
+      }
+
+      function shiftToggle() {
+        isBtnShift = isBtnShift === true ? false : true;
+        if (isBtnShift) {
+          for (let i = 0; i < keyboardKeys.length; i++) {
+            keyboardKeys[i].style.textTransform = "uppercase";
+          }
+        } else {
+          for (let i = 0; i < keyboardKeys.length; i++) {
+            keyboardKeys[i].style.textTransform = "lowercase";
+          }
+        }
+      }
+
+      function readXml(xmlFile) {
+        var xmlDoc;
+        try {
+          if (typeof window.DOMParser != "undefined") {
+            xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", xmlFile, false);
+            xmlhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+
+            if (xmlhttp.overrideMimeType) {
+              xmlhttp.overrideMimeType("text/xml");
+            }
+            xmlhttp.send();
+            xmlDoc = xmlhttp.responseXML;
+          } else {
+            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = "false";
+            xmlDoc.load(xmlFile);
+          }
+          if (!xmlDoc) {
+            return null;
+          }
+          var tagObj = xmlDoc.getElementsByTagName("texts");
+          var textValue = tagObj[0].getElementsByTagName("text");
+          return textValue;
+        } catch (error) {
+          console.log(error);
+        }
+        return null;
+      }
+
+      const xmlText = readXml("text.xml");
+      function timer() {
+        if (isStart) {
+          timerCount++;
+          timerEl.innerHTML = "Time: " + timerCount + " sec";
+          showInfo();
+        }
+      }
+      function showInfo() {
+        let speedWords = 0;
+        let letterSpeed = 0;
+        let userR = "";
+        let accuracy = 0;
+        if (right > 0 && timerCount > 0) {
+          speedWords = Math.floor(right / 5 / (timerCount / 60));
+          letterSpeed = Math.floor(right / (timerCount / 60));
+        }
+        accuracy = Math.floor(((right ?? 1 / mistake ?? 1) * 100) / countLetter);
+
+        if (speedWords > 150) {
+          userR = "A+ speed";
+        } else if (speedWords >= 140) {
+          userR = "A speed";
+        } else if (speedWords >= 130) {
+          userR = "A- speed";
+        } else if (speedWords >= 120) {
+          userR = "Pro speed";
+        } else if (speedWords >= 110) {
+          userR = "Excellent speed";
+        } else if (speedWords >= 100) {
+          userR = "Really great speed";
+        } else if (speedWords >= 90) {
+          userR = "Great speed";
+        } else if (speedWords >= 80) {
+          userR = "Really good speed";
+        } else if (speedWords >= 70) {
+          userR = "Good speed";
+        } else if (speedWords >= 60) {
+          userR = "Somewhat good speed";
+        } else if (speedWords >= 50) {
+          userR = "Above average speed";
+        } else if (speedWords >= 40) {
+          userR = "Average speed";
+        } else if (speedWords >= 30) {
+          userR = "Decent speed";
+        } else if (speedWords >= 25) {
+          userR = "Not bad speed";
+        } else if (speedWords >= 15) {
+          userR = "Bad speed";
+        } else if (speedWords < 15) {
+          userR = "Terrible speed";
+        }
+
+        if (isNaN(accuracy)) {
+          accuracy = 0;
+        }
+        if (speedWords === 0) {
+          userR = "";
+        }
+
+        info.innerText = "correct: " + right + "\nmistake: " + mistake + "\naccuracy: " + accuracy + "%\nWPM: " + speedWords + "\nCPM: " + letterSpeed;
+        currentResult.innerText = "" + userR;
+      }
+      document.addEventListener("keyup", eventHendlerText);
+      function eventHendlerText(event) {
+        startBtn.blur();
+        if (isBtnShift) {
+          shiftToggle();
+        }
+        if (isFinish || event.key === "Shift") {
+          return;
+        }
+        countLetter++;
+        isStart = true;
+
+        if (text.substring(countLetter - 1, countLetter) == event.key) {
+          right++;
+          let letter = "<span class='green'>" + text.substring(countLetter - 1, countLetter) + "</span>";
+          if (text.substring(countLetter - 1, countLetter) == " ") {
+            letter = "&nbsp;";
+          }
+          prevText += letter;
+          resultText.innerHTML += letter;
+        } else {
+          mistake++;
+          let letter = "<span class='red'>" + text.substring(countLetter - 1, countLetter) + "</span>";
+          if (text.substring(countLetter - 1, countLetter) == " ") {
+            letter = "&nbsp;";
+          }
+          prevText += letter;
+          resultText.innerHTML += letter;
+        }
+        if (text.length === countLetter) {
+          isFinish = true;
+          timerEl.innerHTML += "<p>finish</p>";
+          isStart = false;
+          clearInterval(timerInterval);
+        }
+        letterEl.innerHTML = "" + text.substring(countLetter, countLetter + 1) + "";
+        afterEl.innerHTML = text.substring(countLetter + 1);
+        if (text.substring(countLetter - 1, countLetter) == " ") {
+        }
+        if (text.substring(countLetter, countLetter + 1) == " ") {
+          letterEl.innerHTML = "&nbsp; ";
+        }
+        if (text.substring(countLetter + 1, countLetter + 2) == " ") {
+          afterEl.innerHTML = "&nbsp;" + text.substring(countLetter + 1);
+        }
+
+        showInfo();
+      }
+      Restart();
+      function Restart() {
+        text = textDefault;
+        if (xmlText === null) {
+          text = textDefault;
+        } else {
+          let rnd = Math.floor(Math.random() * xmlText.length);
+          text = xmlText[rnd].childNodes[0].nodeValue.trim();
+        }
+        // text = textTest;
+        startBtn.blur();
+        afterEl.innerHTML = text.substring(1);
+        if (text.substring(1, 2) === " ") {
+          afterEl.innerHTML = "&nbsp;" + text.substring(1);
+        }
+        letterEl.innerHTML = "" + text.substring(0, 1) + "";
+        userResult.innerHTML = "";
+        resultText.innerHTML = "";
+        currentResult.innerHTML = "";
+        userResult.innerText = `40 wpm (200 cpm) = Average speed	
+        50 wpm (250 cpm) = Above average speed	
+        60 wpm (300 cpm) = Productive speed	
+        70 wpm (350 cpm) = High speed	
+        120 wpm (600 cpm) = Competitive speed
+
+        wpm = words per minute
+        cpm = characters per minute
+        `;
+        isStart = false;
+        isFinish = false;
+        timerCount = 0;
+        countLetter = 0;
+        prevText = "";
+        afterText = text;
+        mistake = 0;
+        right = 0;
+        wordCount = 0;
+        timerEl.innerHTML = "";
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+        timerInterval = setInterval(timer, 1000);
+        showInfo();
+      }
+    </script>
+    <style>
+      .textWrapper {
+        display: flex;
+        justify-content: center;
+        margin: auto;
+        width: 90vw;
+        font-size: 1.3em;
+        text-align: center;
+      }
+      .textWrapper0 div {
+        font-size: 20px;
+        overflow: hidden;
+        box-sizing: border-box;
+        z-index: 1001;
+        text-wrap: nowrap;
+        border: 1px solid black;
+        margin-top: 30px;
+      }
+      .textWrapper0 p {
+        padding-left: 0%;
+      }
+      .textWrapper1 {
+        display: flex;
+        justify-content: right;
+        margin: auto;
+        font-size: 1.3em;
+        width: 100%;
+      }
+      .spanText {
+        width: 50%;
+      }
+      #letterEl {
+        text-align: center;
+        width: auto;
+        font-weight: bolder;
+        text-decoration: underline;
+      }
+      #aferEl {
+        display: block;
+        font-weight: 100;
+      }
+      #resultText {
+        overflow: hidden;
+        white-space: nowrap;
+        display: flex;
+        justify-content: flex-end;
+      }
+      #userResult {
+        text-align: left;
+        font-size: 0.9rem;
+        padding: 5px;
+        border: 1px black solid;
+      }
+      .text {
+        display: block;
+      }
+      #startBtn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+      }
+      .red {
+        color: red;
+      }
+      .green {
+        color: green;
+      }
+      .keyboardWrapper {
+        position: absolute;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        margin: auto;
+        width: 100vw;
+      }
+      .keyboardRow {
+        display: flex;
+        justify-content: center;
+        /* width: fit-content; */
+        margin: 2px;
+      }
+      .keyboard {
+        display: block;
+        margin: auto;
+        border: 1px solid black;
+        width: fit-content;
+        background-color: black;
+      }
+      .keyboard span {
+        display: inline-flex;
+        justify-content: center;
+        width: 8vw;
+        height: 12vw;
+        border: 1px solid black;
+        border-radius: 5px;
+        margin: 0.1px;
+        line-height: 1.5em;
+        background-color: white;
+        font-size: 6vw;
+      }
+      .keyboard span:active {
+        background-color: lightgray;
+        border: 1px solid green;
+        user-select: none;
+      }
+      #btnshift {
+        width: 12vw;
+      }
+      #btnspace {
+        width: 45vw;
+      }
+      #btnenter {
+        width: 12vw;
+      }
+      .btnCloseKeyboard {
+        display: flex;
+        justify-content: right;
+      }
+      #btnCloseKeyboard {
+        background-color: white;
+        width: 8vw;
+        height: 8vw;
+        font-size: 6vw;
+        text-align: center;
+        border-radius: 5px;
+        transform: rotate(0deg);
+        font-weight: bolder;
+        margin: 1px;
+        cursor: pointer;
+        user-select: none;
+      }
+      @media only screen and (min-width: 600px) {
+        .keyboardWrapper {
+          top: 100%;
+          display: none;
+        }
+      }
+      @media only screen and (max-width: 601px) {
+        .keyboardWrapper {
+          display: block;
+          bottom: 0;
+        }
+      }
+    </style>
+  </body>
+</html>
